@@ -7,9 +7,13 @@ import PostList from "./components/PostList";
 import "./styles/App.css";
 
 function App() {
-
+  //Добавление поста
   const createPost = (newPost) => {
     setPosts([...posts, newPost]);
+  }
+  //Удаление поста
+  const removePost = (post) => {
+    setPosts(posts.filter(p => p.id !== post.id));
   }
 
   const [posts, setPosts] = useState([
@@ -21,7 +25,11 @@ function App() {
   return (
     <div className="App">
       <PostForm create={createPost}/>
-      <PostList posts={posts} title="Посты про JS"/>
+      {/* Условная отрисовка */}
+      {posts.length !== 0 
+        ? <PostList remove={removePost} posts={posts} title="Посты про JS"/>
+        : <h1 style={{textAlign : "center"}}>Посты не были найдены!</h1>
+      }
     </div>
   );
 
