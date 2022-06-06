@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PostFilter from "./components/PostFilter";
 import PostForm from "./components/PostForm";
 //import ClassCounter from "./components/ClassCounter";
@@ -30,6 +30,10 @@ function App() {
     const responce = await axios.get('https://jsonplaceholder.typicode.com/posts');
     setPosts(responce.data);
   }
+
+  useEffect(() => {
+    fetchPosts()
+  }, [])
 
   //Добавление поста
   const createPost = (newPost) => {

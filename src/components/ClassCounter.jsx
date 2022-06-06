@@ -8,8 +8,8 @@ class ClassCounter extends React.Component {
             count: 0
         }
 
-        this.increment = this.increment.bind(this); //не требуется
-        this.decriment = this.decriment.bind(this); //не требуется
+        this.increment = this.increment.bind(this); //bind не требуется
+        this.decriment = this.decriment.bind(this); //bind не требуется
     }
     
     increment = () => {

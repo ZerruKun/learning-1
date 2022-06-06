@@ -3,7 +3,7 @@ import { useMemo } from "react";
 
 export const useSortedPosts = (posts, sort) => {
     const sortedPosts = useMemo(() => {
-        console.log("getSortedPosts сработала");
+        //console.log("getSortedPosts сработала");
         if(sort) {
           return [...posts].sort((a,b) => a[sort].localeCompare(b[sort])) //sort мутирует массив, поэтому копия.
         }
