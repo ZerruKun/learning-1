@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import PostService from "./API/PostService";
 import PostFilter from "./components/PostFilter";
 import PostForm from "./components/PostForm";
 //import ClassCounter from "./components/ClassCounter";
@@ -27,8 +28,8 @@ function App() {
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
 
   async function fetchPosts() {
-    const responce = await axios.get('https://jsonplaceholder.typicode.com/posts');
-    setPosts(responce.data);
+    const posts = await PostService.getAll();
+    setPosts(posts);
   }
 
   useEffect(() => {
