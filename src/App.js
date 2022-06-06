@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import PostForm from "./components/PostForm";
 //import ClassCounter from "./components/ClassCounter";
 //import Counter from "./components/Counter";
@@ -10,7 +10,7 @@ import "./styles/App.css";
 
 function App() {
   const [posts, setPosts] = useState([
-    { id: 1, title: "a", body: "б" },
+    { id: 1, title: "а", body: "б" },
     { id: 2, title: "г", body: "а" },
     { id: 3, title: "я", body: "в" },
   ]);
@@ -18,15 +18,17 @@ function App() {
   const [selectedSort, setSelectedSort] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const getSortedPosts = () => {
-    console.log("getSortedPosts сработала")
+  const sortedPosts = useMemo(() => {
+    console.log("getSortedPosts сработала");
     if(selectedSort) {
       return [...posts].sort((a,b) => a[selectedSort].localeCompare(b[selectedSort])) //sort мутирует массив, поэтому копия.
     }
     return posts;
-  }
+  }, [selectedSort, posts]);
 
-  const sortedPosts = getSortedPosts();
+  const sortedAndSearchedPosts = useMemo(() => {
+    return sortedPosts.filter(post => post.title.toLowerCase().includes(searchQuery));
+  }, [searchQuery, sortedPosts])
 
   //Добавление поста
   const createPost = (newPost) => {
@@ -62,8 +64,8 @@ function App() {
         />
       </div>
       {/* Условная отрисовка */}
-      {posts.length !== 0 ? (
-        <PostList remove={removePost} posts={sortedPosts} title="Посты про JS" />
+      {sortedAndSearchedPosts.length !== 0 ? (
+        <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS" />
       ) : (
         <h1 style={{ textAlign: "center" }}>Посты не были найдены!</h1>
       )}
