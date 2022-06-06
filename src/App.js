@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from "react";
+import PostFilter from "./components/PostFilter";
 import PostForm from "./components/PostForm";
 //import ClassCounter from "./components/ClassCounter";
 //import Counter from "./components/Counter";
 //import PostItem from "./components/PostItem";
 import PostList from "./components/PostList";
-import MyInput from "./components/UI/input/MyInput";
-import MySelect from "./components/UI/select/MySelect";
+// import MyInput from "./components/UI/input/MyInput";
+// import MySelect from "./components/UI/select/MySelect";
 import "./styles/App.css";
 
 function App() {
@@ -15,20 +16,22 @@ function App() {
     { id: 3, title: "я", body: "в" },
   ]);
 
-  const [selectedSort, setSelectedSort] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState({sort:"", query:""})
+
+  // const [selectedSort, setSelectedSort] = useState("");
+  // const [searchQuery, setSearchQuery] = useState("");
 
   const sortedPosts = useMemo(() => {
     console.log("getSortedPosts сработала");
-    if(selectedSort) {
-      return [...posts].sort((a,b) => a[selectedSort].localeCompare(b[selectedSort])) //sort мутирует массив, поэтому копия.
+    if(filter.sort) {
+      return [...posts].sort((a,b) => a[filter.sort].localeCompare(b[filter.sort])) //sort мутирует массив, поэтому копия.
     }
     return posts;
-  }, [selectedSort, posts]);
+  }, [filter.sort, posts]);
 
   const sortedAndSearchedPosts = useMemo(() => {
-    return sortedPosts.filter(post => post.title.toLowerCase().includes(searchQuery));
-  }, [searchQuery, sortedPosts])
+    return sortedPosts.filter(post => post.title.toLowerCase().includes(filter.query));
+  }, [filter.query, sortedPosts])
 
   //Добавление поста
   const createPost = (newPost) => {
@@ -39,36 +42,19 @@ function App() {
     setPosts(posts.filter((p) => p.id !== post.id));
   };
 
-  const sortPosts = (sort) => {
-    setSelectedSort(sort);
-  }
+  // const sortPosts = (sort) => {
+  //   setSelectedSort(sort);
+  // }
 
   return (
     <div className="App">
       <PostForm create={createPost} />
       <hr style={{ margin: "15px 0" }}></hr>
-      <div>
-        <MyInput
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Поиск..." 
-        />
-        <MySelect
-          value={selectedSort}
-          onChange={sortPosts}
-          defaultValue="Сортировка"
-          options={[
-            { value: "title", name: "По названию" },
-            { value: "body", name: "По описанию" },
-          ]}
-        />
-      </div>
-      {/* Условная отрисовка */}
-      {sortedAndSearchedPosts.length !== 0 ? (
-        <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS" />
-      ) : (
-        <h1 style={{ textAlign: "center" }}>Посты не были найдены!</h1>
-      )}
+      <PostFilter
+        filter={filter} 
+        setFilter={setFilter} 
+      />
+      <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS" />
     </div>
   );
 }
