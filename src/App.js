@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";
+import axios from "axios";
+import React, { useState } from "react";
 import PostFilter from "./components/PostFilter";
 import PostForm from "./components/PostForm";
 //import ClassCounter from "./components/ClassCounter";
@@ -7,35 +8,28 @@ import PostForm from "./components/PostForm";
 import PostList from "./components/PostList";
 import MyButton from "./components/UI/button/MyButton";
 import MyModal from "./components/UI/modal/MyModal";
+import { usePosts } from "./hooks/UsePosts";
 // import MyInput from "./components/UI/input/MyInput";
 // import MySelect from "./components/UI/select/MySelect";
 import "./styles/App.css";
 
 function App() {
-  const [posts, setPosts] = useState([
-    { id: 1, title: "а", body: "б" },
-    { id: 2, title: "г", body: "а" },
-    { id: 3, title: "я", body: "в" },
-  ]);
+  const [posts, setPosts] = useState([]);
+
+  // { id: 1, title: "а", body: "б" },
+  // { id: 2, title: "г", body: "а" },
+  // { id: 3, title: "я", body: "в" },
 
   const [filter, setFilter] = useState({sort:"", query:""})
 
   const [modal, setModal] = useState(false);
 
-  // const [selectedSort, setSelectedSort] = useState("");
-  // const [searchQuery, setSearchQuery] = useState("");
+  const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
 
-  const sortedPosts = useMemo(() => {
-    console.log("getSortedPosts сработала");
-    if(filter.sort) {
-      return [...posts].sort((a,b) => a[filter.sort].localeCompare(b[filter.sort])) //sort мутирует массив, поэтому копия.
-    }
-    return posts;
-  }, [filter.sort, posts]);
-
-  const sortedAndSearchedPosts = useMemo(() => {
-    return sortedPosts.filter(post => post.title.toLowerCase().includes(filter.query));
-  }, [filter.query, sortedPosts])
+  async function fetchPosts() {
+    const responce = await axios.get('https://jsonplaceholder.typicode.com/posts');
+    setPosts(responce.data);
+  }
 
   //Добавление поста
   const createPost = (newPost) => {
@@ -47,12 +41,9 @@ function App() {
     setPosts(posts.filter((p) => p.id !== post.id));
   };
 
-  // const sortPosts = (sort) => {
-  //   setSelectedSort(sort);
-  // }
-
   return (
     <div className="App">
+      <button onClick={fetchPosts}>GET POSTS</button>
       <MyButton style={{marginTop: 30}} onClick={() => setModal(true)}>
         Создать пост
       </MyButton>
