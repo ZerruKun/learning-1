@@ -10,7 +10,8 @@ import PostList from "./components/PostList";
 import MyButton from "./components/UI/button/MyButton";
 import Loader from "./components/UI/loader/Loader";
 import MyModal from "./components/UI/modal/MyModal";
-import { usePosts } from "./hooks/UsePosts";
+import { useFetching } from "./hooks/useFetching";
+import { usePosts } from "./hooks/usePosts";
 // import MyInput from "./components/UI/input/MyInput";
 // import MySelect from "./components/UI/select/MySelect";
 import "./styles/App.css";
@@ -28,16 +29,10 @@ function App() {
 
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
 
-  const [isPostLoading, setIsPostLoading] = useState(false);
-
-  async function fetchPosts() {
-    setIsPostLoading (true);
-    setTimeout( async () => {
-      const posts = await PostService.getAll();
-      setPosts(posts);
-      setIsPostLoading (false);
-    }, 1000)
-  }
+  const [fetchPosts, isPostLoading, postError] = useFetching( async () => {
+    const posts = await PostService.getAll();
+    setPosts(posts);
+  })
 
   useEffect(() => {
     fetchPosts()
@@ -67,6 +62,9 @@ function App() {
         filter={filter} 
         setFilter={setFilter} 
       />
+      {postError && 
+        <h1>Произошла ошибка ${postError}</h1>
+      }
       {isPostLoading 
         ? <div style={{display: "flex", justifyContent: "center", marginTop: 50}}><Loader /></div>
         : <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS" />}
