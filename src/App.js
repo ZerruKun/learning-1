@@ -15,6 +15,7 @@ import { usePosts } from "./hooks/usePosts";
 // import MyInput from "./components/UI/input/MyInput";
 // import MySelect from "./components/UI/select/MySelect";
 import "./styles/App.css";
+import { getPageCount, getPagesArray } from "./utils/pages";
 
 function App() {
   const [posts, setPosts] = useState([]);
@@ -29,10 +30,20 @@ function App() {
 
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query);
 
+  const [totalPages, setTotalPages] = useState(0);
+
+  const[limit, setLimit] = useState(10);
+  const[page, setPage] = useState(1);
+
   const [fetchPosts, isPostLoading, postError] = useFetching( async () => {
-    const posts = await PostService.getAll();
-    setPosts(posts);
+    const responce = await PostService.getAll(limit, page);
+    setPosts(responce.data);
+    const totalCount = responce.headers["x-total-count"];
+    setTotalPages(getPageCount(totalCount, limit));
   })
+
+  // Сделать чтобы пересчёт был при изменении общего количества страниц (хук usePagination).
+  let pagesArray = getPagesArray(totalPages);
 
   useEffect(() => {
     fetchPosts()
@@ -47,6 +58,11 @@ function App() {
   const removePost = (post) => {
     setPosts(posts.filter((p) => p.id !== post.id));
   };
+
+  const changePage = (page) => {
+    setPage(page);
+    fetchPosts();
+  }
 
   return (
     <div className="App">
@@ -67,7 +83,17 @@ function App() {
       }
       {isPostLoading 
         ? <div style={{display: "flex", justifyContent: "center", marginTop: 50}}><Loader /></div>
-        : <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS" />}
+        : <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS" />
+      }
+      <div className="page__wrapper">
+        {pagesArray.map(p => 
+          <span 
+          onClick={() => changePage(p)}
+          key={p} 
+          className={page === p ? "page page_current" : "page"}>{p}
+          </span>)
+        }
+      </div>
     </div>
   );
 }
