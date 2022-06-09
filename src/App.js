@@ -10,6 +10,7 @@ import PostList from "./components/PostList";
 import MyButton from "./components/UI/button/MyButton";
 import Loader from "./components/UI/loader/Loader";
 import MyModal from "./components/UI/modal/MyModal";
+import Pagination from "./components/UI/pagination/Pagination";
 import { useFetching } from "./hooks/useFetching";
 import { usePosts } from "./hooks/usePosts";
 // import MyInput from "./components/UI/input/MyInput";
@@ -35,18 +36,15 @@ function App() {
   const[limit, setLimit] = useState(10);
   const[page, setPage] = useState(1);
 
-  const [fetchPosts, isPostLoading, postError] = useFetching( async () => {
+  const [fetchPosts, isPostLoading, postError] = useFetching( async (limit, page) => {
     const responce = await PostService.getAll(limit, page);
     setPosts(responce.data);
     const totalCount = responce.headers["x-total-count"];
     setTotalPages(getPageCount(totalCount, limit));
   })
 
-  // Сделать чтобы пересчёт был при изменении общего количества страниц (хук usePagination).
-  let pagesArray = getPagesArray(totalPages);
-
   useEffect(() => {
-    fetchPosts()
+    fetchPosts(limit, page)
   }, [])
 
   //Добавление поста
@@ -61,7 +59,7 @@ function App() {
 
   const changePage = (page) => {
     setPage(page);
-    fetchPosts();
+    fetchPosts(limit, page);
   }
 
   return (
@@ -85,15 +83,7 @@ function App() {
         ? <div style={{display: "flex", justifyContent: "center", marginTop: 50}}><Loader /></div>
         : <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS" />
       }
-      <div className="page__wrapper">
-        {pagesArray.map(p => 
-          <span 
-          onClick={() => changePage(p)}
-          key={p} 
-          className={page === p ? "page page_current" : "page"}>{p}
-          </span>)
-        }
-      </div>
+      <Pagination page={page} changePage={changePage} totalPages={totalPages}/>
     </div>
   );
 }
