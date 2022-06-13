@@ -8,13 +8,14 @@ import Posts from '../pages/Posts'
 const AppRouter = () => {
   return (
     <Routes>
-    <Route path="/about" element={<About />}/>
-    <Route path="/posts" element={<Posts />}/>
-    <Route path="/error" element={<Error />}/>
-    {/* Двоетоечие после id динамического маршрута */}
-    <Route path="/posts/:id" element={<PostIdPage />} />
-    <Route path="/*" element={<Navigate to="/error" />} />
-  </Routes>
+      <Route path="" element={<Posts />}></Route>
+      <Route path="/about" element={<About />}/>
+      <Route path="/posts" element={<Posts />}/>
+      <Route path="/error" element={<Error />}/>
+      {/* Двоетоечие после id для динамического маршрута */}
+      <Route path="/posts/:id" element={<PostIdPage />} />
+      <Route path="*" element={<Navigate to="/error" />} />
+    </Routes>
   )
 }
 
