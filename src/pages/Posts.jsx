@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useRef } from "react";
 import PostService from "../API/PostService";
 import PostFilter from "../components/PostFilter";
 import PostForm from "../components/PostForm";
@@ -26,16 +27,32 @@ function Posts() {
   const[limit, setLimit] = useState(10);
   const[page, setPage] = useState(1);
 
+  const lastElement = useRef();
+  const observer = useRef();
+  console.log(lastElement);
+
   const [fetchPosts, isPostLoading, postError] = useFetching( async (limit, page) => {
     const responce = await PostService.getAll(limit, page);
-    setPosts(responce.data);
+    setPosts([...posts, ...responce.data]);
     const totalCount = responce.headers["x-total-count"];
     setTotalPages(getPageCount(totalCount, limit));
   })
 
   useEffect(() => {
+    if(isPostLoading) return;
+    if(observer.current) observer.current.disconnect();
+    var callback = function(entries, observer) {
+        if(entries[0].isIntersecting && page < totalPages) {
+          setPage(page+1);
+        }
+    };
+    observer.current = new IntersectionObserver(callback);
+    observer.current.observe(lastElement.current)
+    }, [isPostLoading])
+
+  useEffect(() => {
     fetchPosts(limit, page)
-  }, [])
+  }, [page])
 
   const createPost = (newPost) => {
     setPosts([...posts, newPost]);
@@ -48,7 +65,6 @@ function Posts() {
 
   const changePage = (page) => {
     setPage(page);
-    fetchPosts(limit, page);
   }
 
   return (
@@ -68,11 +84,12 @@ function Posts() {
       {postError && 
         <h1>Произошла ошибка ${postError}</h1>
       }
-      {isPostLoading 
-        ? <div style={{display: "flex", justifyContent: "center", marginTop: 50}}><Loader /></div>
-        : <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS" />
+      <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS" />
+      {isPostLoading &&
+        <div style={{display: "flex", justifyContent: "center", marginTop: 50}}><Loader /></div>
       }
-      <Pagination page={page} changePage={changePage} totalPages={totalPages}/>
+      <div ref={lastElement} style={{height: 20, background: "red"}}></div>
+      <Pagination page={page} changePage={changePage} totalPages={totalPages}/> 
     </div>
   );
 }
